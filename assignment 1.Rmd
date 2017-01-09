@@ -1,0 +1,118 @@
+---
+title: "Assignment 1"
+author: "Lin Ye"
+date: "January 7, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+####1. Write a loop that calculates 12-factorial 
+
+First, get user input. Enter -12.1 as an example
+
+
+
+```{r}
+num_entry = as.numeric(readline(prompt="Enter a number: "))
+
+num_entry =-12.1
+
+##check if the number is negative or decimal
+
+if(num_entry!=round(num_entry) || num_entry < 0){
+  print("Factorial cannot be non integer or negative.")
+  num = abs(round(num_entry,0) )
+} else {
+    num=num_entry  
+}
+```
+
+Once the entry passed checks, print the new number
+
+```{r}
+print(paste("You entered",num_entry,". Showing result for", num))
+factorial = 1
+```
+
+Last, calculate factorial 
+
+```{r}
+if(num == 0) {
+  print("The factorial of 0 is 1")
+} else {
+  for(i in 1:num) {
+    factorial = factorial * i
+  }
+  print(paste("The factorial of", num ,"is",factorial))
+}
+``` 
+
+
+####2. Show how to create a numeric vector that contains the sequence from 20 to 50 by 5. 
+
+```{r}
+x = 20
+y = 50
+z = 5
+seq(x, y, z)
+```
+
+####3. Create the function "factorial" that takes a trio of input numbers a, b, and c and solve the quadratic equation.  The function should print as output the two solutions. 
+
+User define funations
+
+```{r}
+
+factorial_x1 <- function(a,b,c){
+  (-b+sqrt(m))/2*a
+}
+
+factorial_x2 <- function(a,b,c){
+  (-b-sqrt(m))/2*a
+}
+
+
+```
+
+
+Checks are made to ensure a > 0 and no imaginary numbers in calculation.
+
+First, we test it with a=0, b=2, c=1
+
+```{r}
+a=0
+b=2
+c=1
+m=(b*b)-4*a*c
+
+if(a != 0 && m > 0){
+  x1 <-factorial_x1(a,b,c)
+  x2 <-factorial_x2(a,b,c)
+  factorial<-data.frame(cbind(a,b,c,"Solution1"=x1, "Solution2"=x2))
+  print(factorial)
+}else{
+  print("Yields invalid result, try again...")
+}
+```
+
+Next, we test it with a=2, b=4, c=1
+
+```{r}
+a=2
+b=4
+c=1
+m = (b*b)-4*a*c
+
+if(a != 0 && m > 0){
+  x1 <-factorial_x1(a,b,c)
+  x2 <-factorial_x2(a,b,c)
+  factorial<-data.frame(cbind(a,b,c,"Solution1"=x1, "Solution2"=x2))
+  print(factorial)
+}else{
+  print("Yields invalid result, try again...")
+}
+```
