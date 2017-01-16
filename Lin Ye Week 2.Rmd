@@ -1,0 +1,77 @@
+---
+title: "Winter 2017 Week 2"
+author: "Lin Ye"
+date: "January 15, 2017"
+output: html_document
+---
+
+In this assignment, I'm looking at the rating data for US judges
+
+####Description
+
+##Lawyers' ratings of state judges in the US Superior Court. 
+Document is found here http://vincentarelbundock.github.io/Rdatasets/doc/datasets/USJudgeRatings.html
+
+Two ways to get the data
+1. Through file on local drive
+```{r}
+setwd("C:/Users/liye/Documents/R Class")
+getwd()
+data1= read.csv("USJudgeRatings.csv")
+
+head(data1)
+
+rm(data1)
+```
+
+2.Read from link on github.
+```{r}
+data <- read.csv(url("http://vincentarelbundock.github.io/Rdatasets/csv/datasets/USJudgeRatings.csv"))
+
+#Remove some columns we don't need and only focus on a few attributes
+data_new <-subset(data[1:11],select=-c(6:8))
+
+print(paste(length(data_new), "columns and",nrow(data_new),"observations are found in the judge rating dataset"))
+
+
+#Renaming fields to corresponding names based on dictionary
+colnames(data_new) <- c("Name","NumOfContacts","Integrity","Demeanor","Diligence","Familiarity","Oral","Written")
+
+#summerize first three attributes of the dataset
+summary(data_new[2:7])
+
+#Taking a subset of data where # times of contact is above 7
+sub_data <-data_new[data_new[,3]>=8,]
+
+print(paste(length(sub_data), "columns and",nrow(sub_data),"observations are found in the judge rating dataset"))
+
+summary(sub_data[2:7])
+
+
+#mean of the attributes and remove missing values
+sapply(data_new[4:8], mean, na.rm=TRUE)
+
+sapply(sub_data[4:8], mean, na.rm=TRUE)
+
+#median of the attributes and remove missing values
+sapply(data_new[4:8], median, na.rm=TRUE) 
+
+sapply(sub_data[4:8], median, na.rm=TRUE) 
+
+```
+
+Based on the summaries above, judges that have higher integrity are on average receiving higher rating across all other areas. The median of all the measures is also higher among judges with higher integrity.
+
+```{r}
+
+data_new["Integrity_Ranking"]<-data_new$Integrity
+
+data_new$Integrity_Ranking <- with(data_new, ifelse(Integrity < 7, "Low",
+                     ifelse(Integrity >=7 & Integrity < 8, "Med",
+                      "High")))
+
+data_new_1 <-data_new[,c(1:3,9,4:8)]
+
+head(data_new_1,20)
+```
+
