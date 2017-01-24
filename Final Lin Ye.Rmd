@@ -1,0 +1,156 @@
+---
+title: "Final Project"
+author: "Lin Ye"
+date: "January 22, 2017"
+output: html_document
+---
+
+###Effectiveness of Contraception in Developing Country
+
+***
+
+#####Sources: 
+   Origin:  This dataset is a subset of the 1987 National Indonesia Contraceptive Prevalence Survey
+                
+   Relevant Information:
+   This dataset is a subset of the 1987 National Indonesia Contraceptive
+   Prevalence Survey. The samples are married women who were either not 
+   pregnant or do not know if they were at the time of interview. The 
+   problem is to predict the current contraceptive method choice 
+   (no use, long-term methods, or short-term methods) of a woman based 
+   on her demographic and socio-economic characteristics.
+
+   Link: https://archive.ics.uci.edu/ml/datasets/Contraceptive+Method+Choice
+   
+***
+
+
+>Attribute Information:
+>
+>   1. Wife's age                     (numerical)
+>   2. Wife's education               (categorical)      1=low, 2, 3, 4=high
+>   3. Husband's education            (categorical)      1=low, 2, 3, 4=high
+>   4. Number of children ever born   (numerical)
+>   5. Wife's religion                (binary)           0=Non-Islam, 1=Islam
+>   6. Wife's now working?            (binary)           0=Yes, 1=No
+>   7. Husband's occupation           (categorical)      1, 2, 3, 4
+>   8. Standard-of-living index       (categorical)      1=low, 2, 3, 4=high
+>   9. Media exposure                 (binary)           0=Good, 1=Not good
+>   10. Contraceptive method used     (class attribute)  1=No-use 
+                                                        2=Long-term
+                                                        3=Short-term
+
+Question: How do demographics and social-economical class affect women's decision to use contraception?
+
+Within the same social-economical class, how does women's education impact the choice?
+
+
+```{r}
+library(lattice)
+
+
+#Data import
+birth_control <- read.csv(url("https://archive.ics.uci.edu/ml/machine-learning-databases/cmc/cmc.data"))
+
+names(birth_control) <-c("FAge","FEdu","MEdu","NChild","FReligion","FJob","MJob","WealthIndex","MediaExposure","Contraception")
+
+#providing a summary of data structure
+
+str(birth_control)
+
+#summarize the values
+
+summary(birth_control)
+
+#Data Wraggling
+birth_control["Contraception_Lable"]<-NA
+birth_control$Contraception_Lable<-with(birth_control, ifelse(Contraception==1,"No-Use",                                       ifelse(Contraception==2, "Long-Term","Short-Term")))
+
+birth_control["FAge_Group"]<-NA
+birth_control$FAge_Group<-with(birth_control,ifelse(FAge<25,"Young Mother", ifelse(FAge<36, "Prime","Low Fidelity")))
+
+birth_control$FReligion_Label<-with(birth_control, ifelse(FReligion==0, "Non Islamic","Islamic"))
+
+
+head(birth_control)
+
+#Provide some basic overview of the dataset
+
+attach(birth_control)
+bwplot(~NChild|factor(Contraception_Lable),data=birth_control,col="blue",
+        main="# Children born by Contraception Usage",xlab="# of Children born")
+
+
+#The density graph to show female age distribution among those surveyed 
+ 
+plot(density(birth_control$FAge), main="Age distribution")
+
+```
+
+Based on the summary of 1472 observationa, the average age of women is 32.5 with most of women under 30, each household has about 3.2 kids. The population surveyed is mostly Islamic, although a large portion of the women has above average or good education, very few have a job at the current.
+
+The plotbox by contraception group shows that, surprisingly, the group that doesn't use contraception has lowest average # of children than the other two groups. However, we cannot conclude the contraception is ineffective since we have no data on if the household would prefer to have less children than they have.
+
+***
+
+Next, we will look at how religion, standard of living, and wife's age impact the decision to use contraception
+
+For non islamic wife, the contraception usage is evenly distributed among three categories. In contrast, Islamic wives are more likely to not use contraception or only short term methods.
+
+```{r}
+
+table ( birth_control$FReligion_Label , birth_control$Contraception_Lable) 
+
+```
+
+
+The poorer the household, the less contraception the household uses. As the living standard increases, more women choose long term contraception methods over short term ones.
+
+```{r}
+
+histogram(~ Contraception|factor(WealthIndex), data = birth_control, main = "Histogram of Contraception Usage by standard of living", xlab = 'Constraception')
+```
+
+
+The younger generation uses less contraception. For women in their child bearing age groups, the prime group uses more contraception especially long term methods. However, more women in low fidelity range will cease to use contraception at all given the chance of pregancy is lower.
+
+```{r}
+histogram(~ Contraception|factor(FAge_Group), data = birth_control, main = "Histogram of Contraception Usage by Age Group", xlab = 'Constraception')
+```
+
+***
+
+Lastly, let's exam a specific groups of household usage compare to the whole sample
+
+Findings: The households with high standard of living and well educated wife are on average have less children, are more likely to be non islamic, has good exposure to media. The women are more likely to have a job, and use more contraceptions. Contrary to the whole population, this sub group use mostly long term method whereas most women in the survey did not use contraception or only short term methods. 
+
+Holding the standard of living constant, when the wife's education is lower, the households have more children, are most likely to be islamic, have less exposure to media, and use less contraceptions. The family rarely use long term contraception. 
+
+```{r}
+#Look at high income and hign female education households
+Sub_Population <-birth_control[FEdu==4 & WealthIndex==4,] 
+
+Sub_Population2 <-birth_control[FEdu<3 & WealthIndex==4,] 
+
+print(paste("The high wealth and education sample has", nrow(Sub_Population), "Observations"))
+
+print(paste("The high wealth and low education sample has", nrow(Sub_Population2), "Observations"))
+
+#Compare results between the special group and entire population
+sapply(birth_control[1:10], mean)
+
+sapply(Sub_Population[1:10], mean)
+
+sapply(Sub_Population2[1:10], mean)
+
+
+#Contraception usage of sub group
+hist(birth_control$Contraception,main="Contraception Usage (All)",labels = TRUE,xlab="Usage",ylab="# of Observations",ylim=c(0,700))
+ 
+hist(Sub_Population$Contraception,main="Contraception Usage (H Wealth & Edu)",labels = TRUE,xlab="Usage",ylab="# of Observations",ylim=c(0,200))
+
+hist(Sub_Population2$Contraception,main="Contraception Usage (H Wealth & Low Edu)",labels = TRUE,xlab="Usage",ylab="# of Observations",ylim=c(0,100))
+
+```
+
+
